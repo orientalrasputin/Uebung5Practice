@@ -1,0 +1,103 @@
+= Softwareentwicklung im Team: Praktische Übung 5
+:icons: font
+:icon-set: fa
+:experimental:
+:source-highlighter: rouge
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:stem: latexmath
+endif::[]
+
+== Vorbereitung 
+
+Die Vorbereitungsarbeiten müssen Sie *vor der praktischen Übung* abschließen. 
+ 
+Wir erwarten von Ihnen, dass Sie verstanden haben, wie die Dependency Injection mit Spring funktioniert. 
+
+== Ziele der Übung
+
+Diese Übung dient in erster Linie dazu, Dependency Injection mit Spring zu vertiefen. 
+
+== Problemstellung
+
+Wir arbeiten weiter an einer COVID-19 Trackinganwendung für die Universitätsklinik. Da unser Ziel ist, die Dependency Injection mit Spring zu verstehen, werden wir hauptsächlich Dummy Komponenten schreiben, die das Verhalten simulieren. 
+
+Das System soll wie folgt aufgebaut sein:
+
+image::uml.png[link="http://www.plantuml.com/plantuml/uml/dLDHRjiw4FpNAVWf0_85WY187k9N176A0Cu5Lj9Q8aoHBhbAtGIzUxcY95Ajt8_-6DJkxCnmlBnt19RwJcLPSgmKE2UUT8qNyPa98VNHs0v86eqwtuWRSI0hTUDRDVYHeRGt5QX78FHL3Hsck9yJvxFH12TwHUkC_ZTkwS8qgA5L6gCGD3VORxwv2SPd5t-QU4D7Q1iijNJYCqwAE0hsWrv0iiJAl8NgX9P7YO--UU3ilF-1gPZ7UVhTo3eJft3nCriVOL-Xms9g31_XneK8A9Z7eyv3wQfMINGE4nQFOrXq-1zworWwG6z4oQf5-oXHEngk-wq72ruLDRwWgdlTv0jxKLQy-mBgUlndbY9VqFMwRb6IWoumdusJ9FqGHnpy9MIZo5KnuCl9whIgnd6obP2xu6FU-TewSi3m8OVQSbeRvYU2glrVAioF_YTHTaXlUA6S_4zIRa8vxb2eFGJAjTNQGsdiKrpfmmz7s0rkeAvpIZPlCyiSaQhsTOnkDxO3_ruwkattzIvg7SXOQ70Y7rOtP1wfVVqvfXwVtlAISJIiKtm8t1q9C00cKukNdBZQNIfKkylPM48xNzoTGH4M7oWL5j_HfYdZ0FxjfLq9ydQxdPvVDZt3xTtrVOyWZrekRBRyz3HnnrBoAUTOMW3ZqPlxYv6h7RQsJ6tfR0sGtNl5lbFpuHS0"] 
+ 
+
+Schauen wir uns an, wie der Durchlauf durch das System aussieht.
+
+*Phase 1: Starten des Trackings*
+
+* Der Test für eine Person wird im Labor ausgewertet und das Ergebnis im LaborInformationsSystem (LIS) eingetragen. 
+* Der Tracker fragt regelmäßig das LIS nach positiven Testergebnissen
+* Für jeden positiven Test wird der Trackingprozess gestartet, d.h. es wird die Methode `trackingStarten` für jeden Index (positiv getestete Person) aufgerufen. Die Methode 
+** speichert Informationen über den Index im Storage
+** schickt eine Mail an die zuständige Ärztin. Die Mailadresse ist im Datensatz des LIS enthalten.
+
+*Phase 2: Aufbau der Kontaktliste*
+
+Diese Phase findet statt, nachdem die Ärztin die Benachrichtigungsmail erhalten hat. 
+
+* Die Ärztin ermittelt die Kontaktpersonen und trägt diese mithilfe Methode `kontaktperson` ein. 
+* Wenn die Kontaktliste fertig ist, wird sie durch Aufruf der Methode `trackingAbschliessen` abgeschlossen.
+
+*Phase 3: Übermittlung der Daten*
+
+Diese Phase wird durch das Abschließen einer Kontaktliste gestartet. 
+
+* Senden der Liste an das Gesundheitsamt 
+** Der Tracker ruft für den Index die Methode `positiverTest` der Schnittstelle des Gesundheitsamtes (SdG) auf und für jede Kontaktperson die Methode `kontakt`. Es werden nur Kontakte übertragen, deren Expositionszeitpunkt zum Übermittlungszeitpunkt noch keine 14 Tage her ist.
+** Die SdG erzeugt eine Excel Tabelle mithilfe des ExcelExporters, in der ersten Zeile steht in der ersten Spalte der Index, darunter die Kontaktpersonen. Die Methode `informationen` der jeweiligen Klassen liefern alles, was eingetragen werden soll. 
+** Wenn die Kontaktliste vollständig abgearbeitet wurde, schickt die SdG die erstelle ExcelTabelle als Anhang per Mail an `gesund@heitsa.mt`
+
+* Senden der Liste an den Betriebsärztlichen Dienst 
+** Der Tracker ruft für jede Kontaktperson, die zum Personal gehört, die Methode `quarantaeneMeldung` der Schnittstelle Betriebsärztlicher Dienst (BÄD) auf. Es werden nur Kontakte übertragen, deren Expositionszeitpunkt zum Übermittlingszeitpunkt noch keine 14 Tage her ist.
+** Die BÄD Klasse erzeugt eine Exceltabelle, allerdings werden dort in der ersten Spalte nur Kontaktpersonen geführt.
+** Wenn die Kontaktliste vollständig abgearbeitet wurde, schickt die BÄD die erstelle Excel Tabelle als Anhang per Mail an `bäd@u.kd`
+
+== Aufgabenstellung
+
+Das System ist zu einem großen Teil schon implementiert, Sie sollen es nun komplettieren. Es sind zwei Klassen, in denen Sie Methoden vervollständigen müssen: `Tracker` und `TrackerApplication`. In den anderen Klassen ist die Implementierung fertig, aber es müssen dort ggf. noch Dinge ergänzt werden.
+
+In `TrackerApplication` sollen Sie etwas Testcode schreiben, um zu prüfen, dass Ihr Code läuft:
+
+* Fügen Sie mindestens zwei positive Testergebnisse ein. 
+* Fügen Sie in Phase zwei bei einem Index mindestens eine Kontaktperson ein, die zum Personal gehört und mindestens eine Kontaktperson, die nicht zum Personal gehört. 
+
+
+In `Tracker` sollen Sie den Ablauf der Phasen implementieren. 
+
+Außerdem muss das System noch verdrahtet werden, verwenden Sie dazu den Dependency Injection Mechanismus von Spring. Der Quarantänezeitraum und die Häufigkeit der Abfrage des Trackers beim LIS soll über Einträge in der `application.properties` Datei konfigurierbar sein. Es sind dazu in mehreren Klassen Änderungen notwendig.
+
+== Hinweise zur Implementierung 
+
+* Spring Boot hat einen Mechanismus, um Methoden zeitgesteuert auszuführen. Dazu wird eine Konfigurationsklasse (z.B. die Klasse, die mit `SpringBootApplication` annotiert ist), zusätzlich mit `EnableScheduling` annotiert. Dann können wir Methoden mit `Scheduled` annotieren und Spring Boot ruft diese Methoden dann periodisch auf. Ein Beispiel ist in `TrackerApplication` zu finden. 
+
+* Per Default injiziert Spring immer dasselbe Objekt in die Klassen. Wenn immer frische Instanzen injected werden sollen, dann kann das erreicht werden, indem die zu injizierende Klasse mit `@Scope("prototype")` annotiert wird. 
+
+
+== Ablauf der Übung
+
+. Schalten Sie *mindestens* das Mikrofon, aber besser auch die Kamera, ein 
+. Am Anfang gibt es eine kurze Vorstellungsrunde 
+. Es wird festgelegt, in welcher Reihenfolge die "Driver" Rolle übernommen wird
+. Die erste Person teilt Ihren Screen und übernimmt mithilfe von `mob` die Session
+. Es wird an der Problemstellung gemeinsam gearbeitet nach den Regeln des Mob Programmings 
+. Nach ca. der Hälfte der Zeit gibt es ein Feedback durch die Tutorin oder den Tutor
+. Es wird weiter an der Problemstellung gearbeitet
+. ca. 10 Minuten vor Ende der Session bekommen Sie Ihre Abschlussbewertung 
+
+NOTE: Diese praktische Übung wird für die Zulassung gewertet. Sie müssen vorbereitet sein und einen hinreichenden Beitrag leisten. 
+
+
+== Verhaltensregeln
+
+Wir erwarten von Ihnen einen respektvollen Umgang miteinander. Es gilt grundsätzlich bei uns der https://berlincodeofconduct.org/de/[Berlin Code of Conduct]. Die TutorInnen haben die Aufgabe, die Einhaltung der Regeln zu überwachen und können bei Verstößen gegen den Verhaltenskodex Personen aus der praktischen Übung entfernen.   
+
