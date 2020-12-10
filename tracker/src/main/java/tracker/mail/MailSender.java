@@ -1,5 +1,8 @@
 package tracker.mail;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class MailSender {
   public void send(Mail mail) {
     System.out.println("Mail an " + mail.getAdresse() + " verschickt.");

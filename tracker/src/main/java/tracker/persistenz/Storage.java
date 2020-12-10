@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
 import tracker.personen.Index;
 import tracker.personen.KontaktPerson;
 
+@Component
 public class Storage {
 
   private final Map<String, Index> indexTabelle = new HashMap<>();

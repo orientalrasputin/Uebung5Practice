@@ -4,14 +4,16 @@ import static java.time.Period.between;
 
 
 import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import tracker.excel.ExcelExporter;
 import tracker.mail.Mail;
 import tracker.mail.MailSender;
 import tracker.personen.KontaktPerson;
 
-
+@Component
 public class BetriebsaerztlicherDienst {
-
   private final MailSender mailsender;
   private final ExcelExporter exporter;
 

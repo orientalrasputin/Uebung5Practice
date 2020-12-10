@@ -1,5 +1,8 @@
 package tracker.excel;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ExcelExporter {
 
   private final StringBuilder sb = new StringBuilder();
